@@ -49,15 +49,19 @@ Plugin de Claude Code con el proceso de lead gen outbound de Saravá. Trae dos s
 
    Reinicia la app o la sesión para que cargue.
 
-**Actualizar.** La app no ve las versiones nuevas hasta que refrescas el marketplace (en
+**Actualizar.** La app no ve las versiones nuevas hasta que revisas el marketplace (en
 marketplaces propios la actualización automática viene apagada), por eso el botón **Update**
-puede aparecer gris:
-1. Refresca el marketplace `sarava`: en **Settings → Customize → Plugins**, en las opciones
-   del marketplace, **Update marketplace**; o en la terminal
-   `claude plugin marketplace update sarava`.
-2. Ahora sí **Update** en el plugin (o `claude plugin update sarava-leadgen@sarava`).
-3. Opcional: activa **auto-update** para el marketplace `sarava` y se actualiza solo al abrir
-   la app (en la terminal: `/plugin` → pestaña Marketplaces → `sarava` → Enable auto-update).
+del plugin puede aparecer gris:
+
+- **En la app de escritorio:**
+  1. **Settings → Customize → Plugins**.
+  2. Botón **+ Add** → **Manage marketplaces**.
+  3. Selecciona **sarava** → **Check for updates**.
+  4. Vuelve al plugin **Sarava leadgen** → **Update**.
+- **En la terminal:** `claude plugin marketplace update sarava` y después
+  `claude plugin update sarava-leadgen@sarava`.
+- **Si lo instalaste subiendo el ZIP:** descarga el ZIP de nuevo desde el enlace de arriba y
+  vuelve a subirlo.
 
 Si no eres de perfil técnico, haz los pasos 1 a 4 en una llamada corta con alguien del equipo;
 después todo es conversar con Claude.
