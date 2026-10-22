@@ -28,25 +28,25 @@ Plugin de Claude Code con el proceso de lead gen outbound de Saravá. Trae dos s
    webhook ("Lead-gen webhook"): el conector llama a los flujos sin ella.
 3. **CLI de Clay**, solo si vas a armar universos grandes por ICP: pídele a Claude
    "configura Clay".
-4. **El plugin.** La app de escritorio todavía no permite agregar un marketplace propio desde
-   sus menús, así que este paso se hace **una sola vez** con un comando:
+4. **El plugin** (una sola vez):
 
-   - **Desde la app de escritorio** (pestaña Code, sesión local): escríbele a Claude
-     > Autorizo instalar el plugin de mi equipo: ejecuta en la terminal
-     > `claude plugin install sarava-leadgen --marketplace cristobalhiza/lead-gen-outbound-plugin`
-
-     Si Claude no lo ejecuta, pide ayuda a alguien del equipo para correr ese mismo comando en
-     una terminal (2 minutos).
-   - **Desde la terminal de Claude Code**:
+   - **Desde la app de escritorio:**
+     1. Abre **Settings**.
+     2. En la navegación de la izquierda, sección **Customize**, entra a **Plugins**.
+     3. Botón **+ Add** → **Add marketplace**.
+     4. En el modal elige **Add from a repository** y pega
+        `cristobalhiza/lead-gen-outbound-plugin`
+        (o `https://github.com/cristobalhiza/lead-gen-outbound-plugin`).
+     5. En la lista de plugins de ese marketplace, instala **sarava-leadgen**.
+   - **Desde la terminal de Claude Code:**
      ```
      /plugin install sarava-leadgen --marketplace cristobalhiza/lead-gen-outbound-plugin
      ```
 
-   Reinicia la app. Desde ahí todo es con clics: **+** junto al cuadro de texto → **Plugins** →
-   **Manage plugins** para activarlo, desactivarlo o actualizarlo.
+   Reinicia la app o la sesión para que cargue.
 
-Para actualizar cuando haya cambios: en **Manage plugins** → **Update now**, o pídele a Claude
-"actualiza el plugin sarava-leadgen" (`claude plugin update sarava-leadgen@sarava`).
+Para actualizar cuando haya cambios: **Settings → Customize → Plugins** en la app, o
+`claude plugin update sarava-leadgen@sarava` en la terminal.
 
 Si no eres de perfil técnico, haz los pasos 1 a 4 en una llamada corta con alguien del equipo;
 después todo es conversar con Claude.
