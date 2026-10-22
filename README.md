@@ -28,16 +28,25 @@ Plugin de Claude Code con el proceso de lead gen outbound de Saravá. Trae dos s
    webhook ("Lead-gen webhook"): el conector llama a los flujos sin ella.
 3. **CLI de Clay**, solo si vas a armar universos grandes por ICP: pídele a Claude
    "configura Clay".
-4. **El plugin**, dentro de Claude Code:
+4. **El plugin.** La app de escritorio todavía no permite agregar un marketplace propio desde
+   sus menús, así que este paso se hace **una sola vez** con un comando:
 
-   ```
-   /plugin marketplace add cristobalhiza/lead-gen-outbound-plugin
-   /plugin install sarava-leadgen@sarava
-   ```
+   - **Desde la app de escritorio** (pestaña Code, sesión local): escríbele a Claude
+     > Autorizo instalar el plugin de mi equipo: ejecuta en la terminal
+     > `claude plugin install sarava-leadgen --marketplace cristobalhiza/lead-gen-outbound-plugin`
 
-   y reinicia Claude Code.
+     Si Claude no lo ejecuta, pide ayuda a alguien del equipo para correr ese mismo comando en
+     una terminal (2 minutos).
+   - **Desde la terminal de Claude Code**:
+     ```
+     /plugin install sarava-leadgen --marketplace cristobalhiza/lead-gen-outbound-plugin
+     ```
 
-Para actualizar cuando haya cambios: `/plugin marketplace update sarava`.
+   Reinicia la app. Desde ahí todo es con clics: **+** junto al cuadro de texto → **Plugins** →
+   **Manage plugins** para activarlo, desactivarlo o actualizarlo.
+
+Para actualizar cuando haya cambios: en **Manage plugins** → **Update now**, o pídele a Claude
+"actualiza el plugin sarava-leadgen" (`claude plugin update sarava-leadgen@sarava`).
 
 Si no eres de perfil técnico, haz los pasos 1 a 4 en una llamada corta con alguien del equipo;
 después todo es conversar con Claude.
