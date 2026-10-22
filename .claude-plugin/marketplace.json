@@ -1,0 +1,11 @@
+{
+  "name": "sarava",
+  "owner": { "name": "Cristóbal Hiza" },
+  "plugins": [
+    {
+      "name": "sarava-leadgen",
+      "source": "./",
+      "description": "Lead gen B2B (lead-gen) y variantes de copy para Instantly (email-variants)."
+    }
+  ]
+}

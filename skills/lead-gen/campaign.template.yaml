@@ -1,0 +1,61 @@
+# Config de campaña de lead gen. Se llena en la Fase 0 (clarify) y se guarda en
+# <carpeta_campaña>/campaign.yaml. Nada se asume: lo vacío se pregunta.
+
+campaign:
+  name: ""                 # ej. "Acme - Proveedores Chile 2026"
+  client: ""               # ej. Acme
+  folder: ""               # ruta absoluta donde viven los CSV por etapa
+  company_source: icp      # icp (default) | list (solo si el usuario adjunta archivo)
+  icp: {}                  # con icp: industry, country, employee_ranges, otros filtros
+  input_file: ""           # xlsx/csv de empresas (solo con list)
+  input_company_col: ""    # columna con el nombre de empresa
+  input_domain_col: ""     # columna con dominio/web, si existe
+  blacklist_file: ""       # opcional: CSV de empresas a excluir (nombre + dominio); vacío = sin blacklist
+  blacklist_name_col: Company
+  blacklist_domain_col: Domain
+
+people_search:
+  job_titles_seed: []      # los que dio el usuario
+  job_titles: []           # lista aprobada (ampliada o no), ver references/job_titles.md
+  job_titles_excluded: []  # descartados por seniority/área, con motivo
+  seniority_min: ""        # derivado de los cargos y CONFIRMADO por el usuario
+  apollo_seniorities: []   # owner, founder, c_suite, partner, vp, head, director, manager, senior...
+  locations: []            # ej. ["Chile"]
+  max_per_company: 5
+  priority_order: []       # criterios del tope por empresa, en orden; ej.
+                           #   [seniority, area: Operaciones > Personas, has_verified_email, tenure]
+  sources: [apollo, clay]  # clay se corre siempre como segunda fuente salvo que se diga lo contrario
+
+email:
+  clay_waterfall: true     # para sin-email de Apollo y descartados (excluye el mismo inválido)
+  bounceban_limit: null    # tope de créditos por corrida; null = se pregunta antes de gastar
+  extra_blocked_domains: []
+
+waves:
+  target_leads_per_wave: 150   # lo usual 150-200 por semana; se pregunta
+  deadline_target: ""          # ej. "160 hoy": reemplaza al piloto (ver SKILL.md, Tandas)
+  pilot_companies: 40
+  pilot_order: ""              # tamaño | prioridad | al azar
+
+scoring:
+  model: none              # none | modelo del cliente (archivo local) | custom (describir)
+  notes: ""
+
+crm:
+  system: hubspot
+  via: ""                  # connector | token
+  portal_id: ""            # portal del cliente; con connector debe coincidir con el conectado
+  hubspot_env_key: ""      # solo con token: NOMBRE de la variable del .env, nunca el valor
+  language: ""             # en | es: idioma de TODO valor que sube
+  owner_id: ""
+  lead_pipeline: ""        # si crea Leads además de Contacts; vacío = solo contactos
+  batch_label: ""          # etiqueta de batch/lista en HubSpot
+  list_name: ""            # lista estática a crear, si aplica
+  custom_properties: {}    # columna CSV -> propiedad HubSpot
+  rules: []                # ej. asociación sitio->matriz, país, hs_timezone, target_persona
+
+outreach:
+  instantly_campaign_id: ""   # obligatorio para subir; cuenta Saravá salvo indicación
+  prosp_list_id: ""           # obligatorio para subir a Prosp; cuenta Saravá salvo indicación
+  prosp_campaign_id: ""
+  phones: false               # revelar teléfonos (Apollo) — cuesta créditos
