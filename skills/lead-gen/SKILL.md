@@ -1,6 +1,6 @@
 ---
 name: lead-gen
-description: Proceso completo y meticuloso de lead gen B2B para cualquier cliente/campaña de Saravá - desde una lista de empresas hasta HubSpot + Instantly (con email) y Prosp (sin email). Usar cuando el usuario pida "comenzar un lead gen", "armar leads de estas empresas", "buscar contactos en estas cuentas" o retomar/continuar una campaña ("sigamos con la campaña X", "otra tanda"). Campaña nueva: empieza SIEMPRE con una fase de clarificación que fija los criterios en campaign.yaml. Campaña existente: retoma desde state.md.
+description: Lead gen / generación de leads / prospección B2B de Saravá para cualquier cliente - desde un ICP o lista de empresas hasta contactos verificados en HubSpot + Instantly (con email) y Prosp (sin email). Usar SIEMPRE que el usuario quiera hacer, armar, comenzar o retomar un lead gen, buscar leads, prospectos o contactos de empresas, o armar una lista de prospección ("quiero hacer un lead gen", "necesito leads de...", "busca contactos en estas cuentas", "sigamos con la campaña X", "otra tanda"). No es para redactar copy de correos (eso es email-variants). Campaña nueva: empieza SIEMPRE con una fase de clarificación que fija los criterios en campaign.yaml. Campaña existente: retoma desde state.md.
 ---
 
 # Lead gen

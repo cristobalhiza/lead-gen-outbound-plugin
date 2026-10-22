@@ -62,6 +62,17 @@ solo el **nombre** de la variable del `.env`, nunca el valor.
 
 ## Cómo se usa
 
+**La forma más segura de llamarlas es con `/`**: escribe `/` en el cuadro de texto y elige la
+skill, o escríbela completa al inicio del mensaje:
+
+| Para | Escribe |
+|---|---|
+| Hacer o retomar un lead gen | `/sarava-leadgen:lead-gen` y lo que necesitas, ej. `/sarava-leadgen:lead-gen proveedores de minería en México, CEO y COO, 3 por empresa` |
+| Variantes de copy de Instantly | `/sarava-leadgen:email-variants` y el link de la campaña |
+
+También responden a lenguaje normal ("quiero hacer un lead gen", "créame variantes de esta
+campaña"), pero con `/` no hay dudas de cuál se usa.
+
 ### lead-gen
 
 Abre Claude Code en la carpeta del cliente (ej. `~/Proyectos/<cliente>/`) y pide, por ejemplo:
@@ -85,7 +96,6 @@ La skill:
 Trabaja por tandas (piloto de ~40 empresas, o la meta del día si hay plazo) y deja todo en
 `state.md`, así otra sesión puede retomar con "sigamos con la campaña X".
 
-También se pueden llamar directo: `/sarava-leadgen:lead-gen` y `/sarava-leadgen:email-variants`.
 
 ### email-variants
 

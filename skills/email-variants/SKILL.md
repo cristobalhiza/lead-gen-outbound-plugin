@@ -1,6 +1,6 @@
 ---
 name: email-variants
-description: Crea variantes de copy para los pasos de una campaña de Instantly (cold email) contra el fingerprinting de copy - conserva siempre el original, distinto largo/estructura/cantidad de palabras, sin spintax, sin inventar contenido. Usar cuando el usuario pida "variantes", "versiones del copy", "variaciones para la campaña", o pase un link app.instantly.ai/app/campaign/<id>/editor pidiendo variantes.
+description: Crea variantes de copy para los pasos de una campaña de Instantly (cold email) contra el fingerprinting de copy - conserva siempre el original, distinto largo/estructura/cantidad de palabras, sin spintax, sin inventar contenido. Usar solo cuando el usuario pida variantes o versiones del copy de una campaña de Instantly ("variantes", "versiones del copy", "variaciones para la campaña") o pase un link app.instantly.ai/app/campaign/<id>/editor pidiendo variantes. No es para buscar leads ni armar una campaña de prospección (eso es lead-gen).
 ---
 
 # Variantes de copy (Instantly)
