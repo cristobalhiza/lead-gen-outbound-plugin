@@ -1,0 +1,18 @@
+# Al subir un tag vX.Y.Z: arma sarava-leadgen.zip (para "subir plugin" en la app) y crea el release.
+name: release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Versión del tag = versión de plugin.json
+        run: test "v$(jq -r .version .claude-plugin/plugin.json)" = "$GITHUB_REF_NAME"
+      - run: zip -r sarava-leadgen.zip .claude-plugin/plugin.json skills README.md -x '*/__pycache__/*'
+      - run: gh release create "$GITHUB_REF_NAME" sarava-leadgen.zip --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}

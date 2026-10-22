@@ -38,6 +38,10 @@ Plugin de Claude Code con el proceso de lead gen outbound de Saravá. Trae dos s
         `cristobalhiza/lead-gen-outbound-plugin`
         (o `https://github.com/cristobalhiza/lead-gen-outbound-plugin`).
      5. En la lista de plugins de ese marketplace, instala **sarava-leadgen**.
+   - **Si la app no muestra "Add marketplace" sino solo subir:** descarga
+     [sarava-leadgen.zip](https://github.com/cristobalhiza/lead-gen-outbound-plugin/releases/latest/download/sarava-leadgen.zip)
+     (siempre la última versión) y súbelo. Así no se actualiza solo: cuando haya versión nueva,
+     descarga y sube de nuevo.
    - **Desde la terminal de Claude Code:**
      ```
      /plugin install sarava-leadgen --marketplace cristobalhiza/lead-gen-outbound-plugin
@@ -104,6 +108,17 @@ conteos.
 - Lo propio de tu equipo (ruta de scripts locales, clientes con script de CRM o scoring
   propio, reglas fijas por cliente) va en `~/.claude/sarava-leadgen.local.md`, fuera del repo.
   La skill lo lee si existe.
+
+## Publicar una versión nueva (mantenedor)
+
+Subir `version` en `.claude-plugin/plugin.json`, hacer commit y crear el tag con esa versión:
+
+```
+git tag v0.2.0 && git push && git push --tags
+```
+
+GitHub Actions arma `sarava-leadgen.zip` y crea el release (falla si el tag no coincide con
+`plugin.json`).
 
 ## Estructura
 
