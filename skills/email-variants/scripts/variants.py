@@ -9,8 +9,10 @@ definir SIG = "línea1\\nlínea2" en el archivo de variantes.
 
     python3 variants.py <campaign_id> --campaign-json raw/campaign_<id8>.json [--dir .]
         valida + copy_variantes_<id8>.md para revisar + raw/sequences_update_<id8>.json
-        (el `sequences` que va al flujo n8n instantly-sequences, action update)
-La campaña se lee con el flujo n8n instantly-sequences (action get) y se guarda en --campaign-json.
+        (el `sequences` que se escribe con el conector Instantly, o el flujo n8n de respaldo)
+    python3 variants.py <campaign_id> --campaign-json raw/campaign_<id8>.json --after raw/campaign_<id8>_after.json
+        después de escribir: mismos pasos y originales intactos; imprime variantes por paso
+La campaña se lee con el conector Instantly (o el flujo n8n instantly-sequences, action get).
 Respaldo sin n8n: sin --campaign-json lee la API y --apply escribe (solo borrador), con la clave
 del .env por NOMBRE (--key-env instantly_api_key; el valor no se imprime).
 --replace: la campaña ya tiene variantes; conserva la 0 y reemplaza el resto.
@@ -90,6 +92,7 @@ if __name__ == "__main__":
     p.add_argument("campaign_id"); p.add_argument("--dir", default=".")
     p.add_argument("--apply", action="store_true"); p.add_argument("--replace", action="store_true")
     p.add_argument("--campaign-json"); p.add_argument("--key-env", default="instantly_api_key")
+    p.add_argument("--after", help="campaña releída después de escribir: verifica originales intactos")
     a = p.parse_args()
     tag = a.campaign_id[:8]
     os.makedirs(os.path.join(a.dir, "raw"), exist_ok=True)
@@ -105,6 +108,12 @@ if __name__ == "__main__":
 
     camp = json.load(open(a.campaign_json)) if a.campaign_json else api("GET", "campaigns/" + a.campaign_id)
     steps = camp["sequences"][0]["steps"]
+    if a.after:
+        chk = json.load(open(a.after))["sequences"][0]["steps"]
+        assert len(chk) == len(steps), "cambió la cantidad de pasos: %d → %d" % (len(steps), len(chk))
+        assert all(c["variants"][0] == s["variants"][0] for c, s in zip(chk, steps)), \
+            "¡el original cambió! restaurar desde raw/campaign_%s_original.json" % tag
+        sys.exit(print("original intacto · variantes por paso:", [len(c["variants"]) for c in chk]))
     vf = os.path.join(a.dir, "variantes", "c%s.py" % tag)
     if not os.path.exists(vf):                 # primera lectura: respaldo + originales para leer
         json.dump(camp, open(os.path.join(a.dir, "raw", "campaign_%s_original.json" % tag), "w"), ensure_ascii=False, indent=1)

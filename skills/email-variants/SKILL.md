@@ -43,8 +43,9 @@ instalar nada a mano.
 
 ## 2. Leer y respaldar
 
-Leer la campaña con el flujo n8n **instantly-sequences** (paso 5) con `action: "get"` y
-guardar la respuesta en `<carpeta>/raw/campaign_<id8>.json`. Después
+Leer la campaña con el **conector Instantly** (la herramienta que trae una campaña por ID,
+con sus `sequences`) y guardar el JSON tal cual en `<carpeta>/raw/campaign_<id8>.json`. Sin
+conector Instantly: flujo n8n **instantly-sequences** (paso 5) con `action: "get"`. Después
 `python3 <skill>/scripts/variants.py <id> --campaign-json raw/campaign_<id8>.json`, desde la carpeta de la campaña:
 sin archivo de variantes todavía, deja los originales en `copy_originales_<id8>.md` para
 escribir a partir de ellos. **Avisar antes de escribir** si el
@@ -75,13 +76,28 @@ En `<carpeta>/variantes/c<id8>.py` (formato en el docstring del script). Reglas:
 
 `python3 scripts/variants.py <id> --campaign-json raw/campaign_<id8>.json` →
 `copy_variantes_<id8>.md` con cada versión, su conteo de palabras, el rango por paso y las
-frases repetidas, y `raw/sequences_update_<id8>.json` (lo que se manda a n8n). Corregir los avisos
+frases repetidas, y `raw/sequences_update_<id8>.json` (el `sequences` que se escribe). Corregir los avisos
 de frases repetidas. Mostrar al usuario el rango de palabras por paso y el link al `.md`;
 pedir OK.
 
 ## 5. Escribir en Instantly
 
-Flujo n8n **instantly-sequences** (`execute_workflow`, workflowId `201TuEKiJgIdUy67`,
+**Vía por defecto: conector Instantly.** Respaldo: la primera corrida del script dejó la
+campaña original en `raw/campaign_<id8>_original.json`.
+
+1. Releer la campaña con el conector y comprobar, antes de escribir: `status` = 0 (borrador),
+   misma cantidad de pasos y originales (`variants[0]`) iguales a `raw/campaign_<id8>.json`.
+   Si algo no calza, no escribir y avisar.
+2. Mostrar variantes por paso y asuntos (sale de `copy_variantes_<id8>.md`) y pedir OK.
+3. Actualizar la campaña con la herramienta de update del conector, mandando solo
+   `sequences` = contenido de `raw/sequences_update_<id8>.json`.
+4. Releer, guardar en `raw/campaign_<id8>_after.json` y correr
+   `python3 <skill>/scripts/variants.py <id> --campaign-json raw/campaign_<id8>.json --after raw/campaign_<id8>_after.json`
+   → debe decir "original intacto".
+5. Si algo salió mal: con OK, update con el `sequences` de `raw/campaign_<id8>_original.json`.
+
+**Respaldo sin conector Instantly** (se quita en la próxima versión): flujo n8n
+**instantly-sequences** (`execute_workflow`, workflowId `201TuEKiJgIdUy67`,
 `triggerNodeName: "Webhook"`, `executionMode: "production"`,
 `inputs: {webhookData: {method: "POST", body}}`; el resultado sale del nodo "Respuesta",
 leído con `get_workflow_execution`):
@@ -94,10 +110,9 @@ leído con `get_workflow_execution`):
    restore también es seco por defecto).
 
 El flujo rechaza sin escribir si la campaña no está en borrador, si cambió algún original o
-la cantidad de pasos. Anotar el `backup_id` en `state.md`. La clave de Instantly vive solo en
-n8n.
+la cantidad de pasos. Anotar el `backup_id` en `state.md`.
 
-Flujo publicado y probado en vivo (2026-10-22). Solo si el conector n8n no está disponible:
+Sin conector Instantly ni n8n:
 respaldo local `variants.py <id>` (sin `--campaign-json` lee la API) y `--apply` (solo
 borrador, respalda en `raw/`), que lee la clave del `.env` por nombre (`--key-env`) sin
 mostrarla; anotarlo en `state.md`.

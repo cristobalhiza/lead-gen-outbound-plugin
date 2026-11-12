@@ -30,12 +30,17 @@ instalar nada a mano.
 ## Conectores (primera vez, antes de la Fase 0)
 
 Revisar qué herramientas están disponibles en la sesión (sin llamarlas ni gastar nada):
-Apollo (`apollo_*`), Clay, HubSpot, n8n y LeadOcean (`leadocean_*`; de esta última,
+Apollo (`apollo_*`), Clay, HubSpot, Instantly, n8n y LeadOcean (`leadocean_*`; de esta última,
 `leadocean_get_account` es gratis y confirma que la sesión está iniciada). Mostrar al usuario
 una tabla corta con lo que está y lo que falta, y guiarlo **paso a paso, de a uno**, con
 instrucciones que sirvan en la app de escritorio:
 - **Apollo, Clay, HubSpot**: claude.ai → Configuración → Conectores → buscar y conectar.
-- **n8n**: https://claude.ai/directory/n8n, con la URL de la instancia de Saravá y la cuenta
+- **Instantly**: conector personalizado en claude.ai → Configuración → Conectores → Agregar
+  conector personalizado, nombre `Instantly`, URL `https://mcp.instantly.ai/mcp/<API_KEY>`.
+  La API key es **personal**: que se la pida a quien administra Instantly en Saravá y la pegue
+  solo en ese formulario, nunca en el chat (si la pega en el chat, avisar que hay que
+  revocarla y pedir otra).
+- **n8n** (verificación de emails y Prosp): https://claude.ai/directory/n8n, con la URL de la instancia de Saravá y la cuenta
   compartida (la URL y el acceso los da Cristóbal por un canal privado; nunca pedirlos ni
   pegarlos en el chat).
 - **LeadOcean**: viene con el plugin; si sus herramientas no aparecen o piden login: `/mcp` →
@@ -289,8 +294,22 @@ por dominio bloqueado/Cisco/spamtrap no se reintentan.
 
 ## Fase 6 - Outreach
 
-Siempre en seco primero, después la subida real con OK explícito: flujos n8n
-`instantly-upload` / `prosp-upload` (`dry_run: true`, después `false`).
+Siempre en seco primero (muestra + conteos), después la subida real con OK explícito.
+
+**Instantly por su conector** (herramienta de agregar leads en bulk a una campaña, con
+`skip_if_in_campaign: true`). Respaldo sin conector, se quita en la próxima versión: flujo n8n
+`instantly-upload` (`dry_run: true`, después `false`). Con el conector, el seco lo hace la
+skill antes de llamar:
+- Solo filas de `07_verified_Send.csv` con `Verify_Verdict` "Reoon safe" o "BounceBan
+  deliverable"; cualquier otra → fuera, listada.
+- **Ningún lead sin `lead_id`** (en `custom_variables`): si falta alguno, no se sube nada.
+- `campaign_id` = `outreach.instantly_campaign_id`; confirmar nombre y estado de la campaña con
+  el conector antes de subir.
+- Mostrar conteo, 3 filas de muestra y rechazados → OK → subir en bloques, ordenados de menor
+  a mayor score.
+- Después: contar los leads de la campaña con el conector y contrastar con lo subido.
+
+Prosp: flujo n8n `prosp-upload` (`dry_run: true`, después `false`).
 
 Instantly: solo `_Send`; sube de menor a mayor score (canario). **Cada lead lleva `lead_id`
 (id del Lead de HubSpot creado en la Fase 5)**: sin él, el flujo "Instantly - n8n" no registra

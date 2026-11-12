@@ -21,12 +21,16 @@ Plugin de Claude Code con el proceso de lead gen outbound de Saravá. Trae dos s
    | Clay | Segunda fuente de empresas y personas, waterfall de email |
    | LeadOcean | Tercera fuente de empresas, personas y emails (ver abajo) |
    | HubSpot | Dedupe y carga al CRM del cliente (o token del cliente, ver abajo) |
-   | n8n | Verificación de emails, subida a Instantly y Prosp, variantes de copy |
+   | Instantly | Subida de leads y variantes de copy (conector personalizado, ver abajo) |
+   | n8n | Verificación de emails y subida a Prosp |
 
    n8n: conéctalo desde https://claude.ai/directory/n8n con la URL de la instancia de Saravá e
    inicia sesión con la cuenta compartida de n8n para autorizar (pide la URL y el acceso a
    Cristóbal por un canal privado, nunca por el chat con Claude). No necesitas la clave del
    webhook ("Lead-gen webhook"): el conector llama a los flujos sin ella.
+   Instantly: **Agregar conector personalizado**, nombre `Instantly`, URL
+   `https://mcp.instantly.ai/mcp/<API_KEY>`. La API key es personal: pídesela a quien
+   administra Instantly en Saravá y pégala solo en ese formulario, nunca en el chat.
    LeadOcean no está en el directorio de claude.ai: viene incluido en el plugin (paso 4).
    Después de instalarlo, solo falta iniciar sesión una vez: escribe `/mcp`, elige
    **leadocean** y autentica con la cuenta de LeadOcean de Saravá.
@@ -70,9 +74,10 @@ del plugin puede aparecer gris:
 Si no eres de perfil técnico, haz los pasos 1 a 4 en una llamada corta con alguien del equipo;
 después todo es conversar con Claude.
 
-**Las claves no pasan por el chat.** Las de Reoon, BounceBan, Instantly y Prosp viven en
-credenciales de la instancia n8n de Saravá, y los flujos se llaman con el conector. Apollo,
-Clay, LeadOcean y HubSpot van por sus conectores. Si un cliente usa token de HubSpot, la skill pregunta
+**Las claves no pasan por el chat.** Las de Reoon, BounceBan y Prosp viven en credenciales de
+la instancia n8n de Saravá, y los flujos se llaman con el conector. La de Instantly es una por
+persona y va solo en el formulario del conector. Apollo, Clay, LeadOcean y HubSpot van por sus
+conectores. Si un cliente usa token de HubSpot, la skill pregunta
 solo el **nombre** de la variable del `.env`, nunca el valor.
 
 ## Cómo se usa
