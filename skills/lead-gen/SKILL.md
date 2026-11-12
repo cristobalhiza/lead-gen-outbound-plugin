@@ -254,7 +254,11 @@ por dominio bloqueado/Cisco/spamtrap no se reintentan.
 Siempre en seco primero, después la subida real con OK explícito: flujos n8n
 `instantly-upload` / `prosp-upload` (`dry_run: true`, después `false`).
 
-Instantly: solo `_Send`; sube de menor a mayor score (canario). Prosp: los que no tienen email
+Instantly: solo `_Send`; sube de menor a mayor score (canario). **Cada lead lleva `lead_id`
+(id del Lead de HubSpot creado en la Fase 5)**: sin él, el flujo "Instantly - n8n" no registra
+los eventos en HubSpot y manda DM "evento sin lead_id". El upload usa `skip_if_in_campaign`, así
+que un lead subido sin `lead_id` no se arregla re-subiéndolo (hay que hacer PATCH en Instantly;
+caso real: Corfo w1, 2026-11-06). Guardar `email,lead_id` localmente al crear los Leads. Prosp: los que no tienen email
 enviable y sí LinkedIn. El workspace es compartido entre clientes: el id nunca se adivina.
 
 **Límite de Prosp (~50 leads/min, responde 429):** subir en tandas de ≤40 con 1 min entre
