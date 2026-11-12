@@ -24,6 +24,14 @@ Respaldo sin n8n: `verify_router.py --csv 06_emails.csv --out 07_verified` con `
 después `--limit N` (sin `--limit` no gasta; columna `Email_Final`). Los 408 →
 `bounceban_recover.py` (gratis por Task ID).
 
+## Email de LeadOcean (antes de Clay)
+
+`leadocean_get_lead` con `reveal_email: true` (Fase 3, paso 1b). Mismas reglas que Clay:
+candidato, nunca pisa un Apollo `verified` + no catch-all, dominio calcado con `dig MX`, y todo
+vuelve a pasar por el router aunque LeadOcean diga `verified`. Puede traer emails personales:
+solo se usa el de trabajo (`email_type` work). Lo que LeadOcean no resuelve sigue al waterfall
+Clay.
+
 ## Waterfall de email con Clay (MCP)
 
 Para: sin email de Apollo **y** descartados por el router.

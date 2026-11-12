@@ -48,3 +48,5 @@ quita o rescata. La lista aprobada va a `people_search.job_titles` y lo descarta
 - Apollo: `person_titles` = lista aprobada completa (además del filtro `person_seniorities`).
 - Clay: la lista aprobada en `job_title in (...)` o `is_similar_to` con los cargos núcleo;
   `is_similar_to` ya expande por significado, así que revisar que no traiga los dudosos.
+- LeadOcean: `title` = lista aprobada (busca por palabra; `[Cargo]` entre corchetes = exacto)
+  más `seniority`; `excludeTitle` para los excluidos que se cuelan.

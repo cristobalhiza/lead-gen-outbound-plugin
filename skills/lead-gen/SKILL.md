@@ -27,6 +27,24 @@ Si no hay: decirle al usuario en una línea qué se va a instalar y por qué, y 
 Verificar con `--version` y anotar en `state.md` qué comando quedó. El usuario nunca tiene que
 instalar nada a mano.
 
+## Conectores (primera vez, antes de la Fase 0)
+
+Revisar qué herramientas están disponibles en la sesión (sin llamarlas ni gastar nada):
+Apollo (`apollo_*`), Clay, HubSpot, n8n y LeadOcean (`leadocean_*`; de esta última,
+`leadocean_get_account` es gratis y confirma que la sesión está iniciada). Mostrar al usuario
+una tabla corta con lo que está y lo que falta, y guiarlo **paso a paso, de a uno**, con
+instrucciones que sirvan en la app de escritorio:
+- **Apollo, Clay, HubSpot**: claude.ai → Configuración → Conectores → buscar y conectar.
+- **n8n**: https://claude.ai/directory/n8n, con la URL de la instancia de Saravá y la cuenta
+  compartida (la URL y el acceso los da Cristóbal por un canal privado; nunca pedirlos ni
+  pegarlos en el chat).
+- **LeadOcean**: viene con el plugin; si sus herramientas no aparecen o piden login: `/mcp` →
+  **leadocean** → autenticar con la cuenta de LeadOcean de Saravá.
+
+Los conectores nuevos cargan al reiniciar la sesión: decirlo, y que al volver escriba
+"sigamos". Si el usuario quiere avanzar sin uno, seguir sin esa fuente y anotarlo en
+`campaign.yaml` (`sources`) y en `state.md`. Si ya está todo, una línea y seguir.
+
 ## Estado de la campaña (`<carpeta>/state.md`) - obligatorio
 
 Es lo que permite retomar en otra sesión. Dos partes:
@@ -35,7 +53,7 @@ Es lo que permite retomar en otra sesión. Dos partes:
    exacto** (comando o llamada), decisiones pendientes del usuario, archivo vigente de cada
    etapa, IDs abiertos (Clay taskId, BounceBan Task IDs 408, n8n run_id/executionId),
    acumulados por destino (HubSpot, Instantly, Prosp), empresas procesadas / restantes,
-   créditos gastados (Apollo, BounceBan, Clay).
+   créditos gastados (Apollo, BounceBan, Clay; registros LeadOcean).
 2. **Historial** (abajo, solo se agrega): una entrada por etapa o tanda cerrada, con fecha,
    conteos, créditos y decisiones del usuario (textuales si cambian criterios).
 
@@ -58,6 +76,10 @@ Herramientas:
   `instantly_upload.py`, `prosp_upload.py`) en la ruta del archivo local; uso en
   `references/verificacion.md` y en su `--help`. Anotarlo en `state.md`. Si no hay, avisar.
 - De esta skill: `scripts/normalize_company.py` (nombres) y `scripts/blacklist.py` (exclusiones).
+- **LeadOcean por su MCP** (`leadocean_*`): tercera fuente de empresas, personas y emails.
+  Plan fair use: cada registro devuelto cuenta, pero no hay tope mensual; `count_*`,
+  `list_filters` y `list_enum_values` son gratis. Industria y país solo aceptan valores del
+  catálogo: resolverlos con `leadocean_list_enum_values`, nunca adivinarlos. País en ISO-2.
 - **Apollo, Clay y HubSpot por sus conectores** (MCP; Clay también por CLI). **Nunca leer
   claves del `.env` en código propio** ni llamar las APIs REST directo, aunque la carpeta tenga
   scripts viejos que lo hacen o un `.env` con claves: eso es de antes de los conectores. Si el
@@ -137,11 +159,18 @@ Apollo limita por minuto, hora y día según el endpoint, también vía MCP. Por
   creciente. No saltarse las empresas en silencio: deben quedar marcadas como pendientes.
 - Anotar en `state.md` qué endpoint cortó y a qué volumen, para dimensionar las tandas siguientes.
 
+LeadOcean: 5 req/s; ventanas de 5 h y semanales por búsqueda y por enriquecimiento
+(`leadocean_get_account`, gratis, antes de una tanda grande). 429 → esperar 1 s y reintentar;
+402 → sin créditos, avisar al usuario.
+
 ## Fase 1 - Empresas
 
 0. **Solo con ICP**: `apollo_mixed_companies_search` con industria, país y rangos de
    empleados de la config (paginar hasta agotar), y Clay con los mismos criterios como segunda
-   fuente. Clay por **CLI** (`clay searches`, 500 por página, a archivo) cuando el ICP pasa de
+   fuente. LeadOcean como tercera (si está en `sources`): primero `leadocean_count_companies`
+   (gratis) para dimensionar, después `leadocean_search_companies` con `hqCountry`,
+   `industry`/`keywords`, `employeeRange` y `hasMailableContacts: true`, paginando con
+   `cursor`. Clay por **CLI** (`clay searches`, 500 por página, a archivo) cuando el ICP pasa de
    ~100 empresas: el MCP `search-companies` pagina de a 20 y llena el contexto.
    Unir por dominio. Mostrar conteo por tamaño, una muestra de 20 y las que parezcan fuera del
    ICP (proveedores vs. operadoras, matrices extranjeras sin operación en el país); el usuario
@@ -175,7 +204,7 @@ Apollo limita por minuto, hora y día según el endpoint, también vía MCP. Por
 5. **Ya existentes en HubSpot**: buscar por dominio/nombre (HubSpot MCP o API con el token
    de la config). Marcar `HS_Company_ID`; no se duplican. → `03_companies_enriched.csv`
 
-## Fase 2 - Personas (Apollo + Clay)
+## Fase 2 - Personas (Apollo + Clay + LeadOcean)
 
 1. **Apollo** `apollo_mixed_people_api_search`: `organization_ids` + `person_titles` +
    `person_seniorities` (de la config) + `person_locations`. Paginado hasta agotar.
@@ -183,10 +212,15 @@ Apollo limita por minuto, hora y día según el endpoint, también vía MCP. Por
    por llamada), mismos cargos/seniority/ubicación en DSL, con
    `limit <tope> by clay_company_id`. Se corre siempre como segunda fuente salvo que la config
    diga lo contrario. Guardar el `taskId` (sirve después para el email).
+2b. **LeadOcean** `leadocean_search_leads` (si está en `sources`): `domain` (hasta las empresas
+   de la tanda), `title` (lista aprobada), `seniority`, `country`; `limit` 100 y paginar con
+   `cursor`. Antes, `leadocean_count_leads` (gratis) para ver cuántos registros va a costar.
+   Trae registros delgados con `has_email`/`has_phone` y LinkedIn; el email se revela en la
+   Fase 3.
 3. **Unir y deduplicar** en dos pasos. Antes del match, Apollo search no trae LinkedIn ni el
    apellido completo: deduplicar por empresa + nombre + inicial del apellido. Después del
    `bulk_match` (Fase 3), de nuevo por URL de LinkedIn normalizada (minúsculas, sin
-   `http(s)://www.`, sin `/` final, decodificada). Columna `Source` = apollo | clay | both.
+   `http(s)://www.`, sin `/` final, decodificada). Columna `Source` = apollo | clay | leadocean, o varias separadas por `+`.
 4. **Aplicar tope por empresa** con el `priority_order` de la config. Guardar los que quedaron
    fuera en `04_overflow.csv` (no se pierden). → `04_people.csv`
 5. **Punto de control**: conteo por empresa, empresas con 0 leads, costo estimado del
@@ -198,7 +232,11 @@ Apollo limita por minuto, hora y día según el endpoint, también vía MCP. Por
    LinkedIn: email + status, LinkedIn, ciudad, headline, fecha de inicio del cargo, todo lo
    que pide el CRM, en **una sola pasada** (no re-enriquecer al final). Informar el bloque
    `mcp_credits`.
-2. **Deduplicar por LinkedIn** (segundo paso de la Fase 2.3): si Apollo y Clay traen a la
+1b. **LeadOcean `leadocean_get_lead`** (por LinkedIn, `reveal_email: true`; 1 registro c/u)
+   para los que siguen sin email de Apollo y tienen `has_email`. Va antes del waterfall Clay
+   porque no gasta créditos pagados. El email trae `email_status` de LeadOcean: es
+   **candidato**, pasa igual por el router. `Email_Source = leadocean`.
+2. **Deduplicar por LinkedIn** (segundo paso de la Fase 2.3): si varias fuentes traen a la
    misma persona, queda una fila (gana la que tiene email verificado).
 3. **Filtro de calidad, antes de verificar y de HubSpot** (lo que se crea en el CRM y no sale
    a outreach queda sucio). Marcar `Excluir` con motivo y mostrar la lista al usuario:
@@ -273,5 +311,5 @@ la sesión; borrar archivos de estado viejos (`RUN.md`, etc.) si `state.md` ya l
 
 Resumen en `state.md` y al usuario: empresas, descartadas por blacklist (lista de
 `00_blacklisted.csv` con su match), leads por fuente, emails por fuente, Send/Discard/
-Pending, créditos gastados (Apollo, BounceBan, Clay), creados/actualizados en HubSpot,
+Pending, créditos gastados (Apollo, BounceBan, Clay; registros LeadOcean), creados/actualizados en HubSpot,
 subidos a Instantly/Prosp, y pendientes.

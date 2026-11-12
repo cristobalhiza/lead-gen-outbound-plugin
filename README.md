@@ -19,6 +19,7 @@ Plugin de Claude Code con el proceso de lead gen outbound de Saravá. Trae dos s
    |---|---|
    | Apollo | Empresas, personas y emails |
    | Clay | Segunda fuente de empresas y personas, waterfall de email |
+   | LeadOcean | Tercera fuente de empresas, personas y emails (ver abajo) |
    | HubSpot | Dedupe y carga al CRM del cliente (o token del cliente, ver abajo) |
    | n8n | Verificación de emails, subida a Instantly y Prosp, variantes de copy |
 
@@ -26,6 +27,9 @@ Plugin de Claude Code con el proceso de lead gen outbound de Saravá. Trae dos s
    inicia sesión con la cuenta compartida de n8n para autorizar (pide la URL y el acceso a
    Cristóbal por un canal privado, nunca por el chat con Claude). No necesitas la clave del
    webhook ("Lead-gen webhook"): el conector llama a los flujos sin ella.
+   LeadOcean no está en el directorio de claude.ai: viene incluido en el plugin (paso 4).
+   Después de instalarlo, solo falta iniciar sesión una vez: escribe `/mcp`, elige
+   **leadocean** y autentica con la cuenta de LeadOcean de Saravá.
 3. **CLI de Clay**, solo si vas a armar universos grandes por ICP: pídele a Claude
    "configura Clay".
 4. **El plugin** (una sola vez):
@@ -68,7 +72,7 @@ después todo es conversar con Claude.
 
 **Las claves no pasan por el chat.** Las de Reoon, BounceBan, Instantly y Prosp viven en
 credenciales de la instancia n8n de Saravá, y los flujos se llaman con el conector. Apollo,
-Clay y HubSpot van por sus conectores. Si un cliente usa token de HubSpot, la skill pregunta
+Clay, LeadOcean y HubSpot van por sus conectores. Si un cliente usa token de HubSpot, la skill pregunta
 solo el **nombre** de la variable del `.env`, nunca el valor.
 
 ## Cómo se usa
@@ -96,10 +100,10 @@ La skill:
    opcional, cargos (ofrece ampliarlos), seniority mínimo, tope por empresa y prioridad, CRM
    (portal, idioma, reglas), IDs de Instantly y Prosp, presupuesto, meta por tanda. Todo
    queda en `campaign.yaml`.
-2. **Empresas**: universo por ICP (Apollo + Clay), blacklist, normalización de nombres
+2. **Empresas**: universo por ICP (Apollo + Clay + LeadOcean), blacklist, normalización de nombres
    (script + revisión con Haiku), dominios, enriquecimiento, existentes en HubSpot.
-3. **Personas**: Apollo + Clay, dedupe, tope por empresa.
-4. **Emails**: enriquecimiento Apollo, filtro de calidad, waterfall Clay.
+3. **Personas**: Apollo + Clay + LeadOcean, dedupe, tope por empresa.
+4. **Emails**: enriquecimiento Apollo, email de LeadOcean, filtro de calidad, waterfall Clay.
 5. **Verificación** (n8n): Reoon y luego BounceBan solo para catch-all/unknown, con tu OK al costo.
 6. **CRM** y **outreach**: HubSpot primero, después Instantly (con email) y Prosp (sin email),
    siempre en seco antes de la subida real.

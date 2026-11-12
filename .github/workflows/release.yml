@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Versión del tag = versión de plugin.json
         run: test "v$(jq -r .version .claude-plugin/plugin.json)" = "$GITHUB_REF_NAME"
-      - run: zip -r sarava-leadgen.zip .claude-plugin/plugin.json skills README.md -x '*/__pycache__/*'
+      - run: zip -r sarava-leadgen.zip .claude-plugin/plugin.json .mcp.json skills README.md -x '*/__pycache__/*'
       - run: gh release create "$GITHUB_REF_NAME" sarava-leadgen.zip --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}

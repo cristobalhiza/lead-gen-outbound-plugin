@@ -20,11 +20,12 @@ people_search:
   job_titles_excluded: []  # descartados por seniority/área, con motivo
   seniority_min: ""        # derivado de los cargos y CONFIRMADO por el usuario
   apollo_seniorities: []   # owner, founder, c_suite, partner, vp, head, director, manager, senior...
+                           # (LeadOcean `seniority` usa los mismos valores)
   locations: []            # ej. ["Chile"]
   max_per_company: 5
   priority_order: []       # criterios del tope por empresa, en orden; ej.
                            #   [seniority, area: Operaciones > Personas, has_verified_email, tenure]
-  sources: [apollo, clay]  # clay se corre siempre como segunda fuente salvo que se diga lo contrario
+  sources: [apollo, clay, leadocean]  # clay y leadocean se corren siempre salvo que se diga lo contrario
 
 email:
   clay_waterfall: true     # para sin-email de Apollo y descartados (excluye el mismo inválido)
