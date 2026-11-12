@@ -4,7 +4,8 @@
 Los textos los escribe el agente en <carpeta>/variantes/c<id8>.py:
     V = {1: [("", None), ("asunto", \"\"\"cuerpo sin firma\"\"\"), ...], 2: [...]}
 posición 0 = original (se toma de Instantly, no se escribe); cuerpo en texto plano, la firma
-se copia del original.
+se copia del original. Si el original trae la firma escrita a mano (sin {{...signature}}),
+definir SIG = "línea1\\nlínea2" en el archivo de variantes.
 
     python3 variants.py <campaign_id> --campaign-json raw/campaign_<id8>.json [--dir .]
         valida + copy_variantes_<id8>.md para revisar + raw/sequences_update_<id8>.json
@@ -120,7 +121,8 @@ if __name__ == "__main__":
     avisos = check(mod.V, orig)
     out, md = [], ["# Variantes · %s\n\nOriginal + %d por paso. Palabras = cuerpo sin firma.\n" % (camp["name"], len(mod.V[1]) - 1)]
     for i, s in enumerate(orig, 1):
-        o = s["variants"][0]; sig = signature(o["body"])
+        # firma escrita a mano en el original (sin {{...signature}}): el archivo de variantes la da en SIG
+        o = s["variants"][0]; sig = signature(o["body"]) or getattr(mod, "SIG", "")
         vs = [dict(o)] + [{"subject": subj, "body": to_html(b, sig)} for subj, b in mod.V[i][1:]]
         out.append(dict(s, variants=vs))
         largos = [len(to_text(v["body"]).replace(sig, "").split()) for v in vs]
