@@ -3,6 +3,10 @@
     "leadocean": {
       "type": "http",
       "url": "https://api.leadocean.io/mcp"
+    },
+    "instantly": {
+      "type": "http",
+      "url": "https://mcp.instantly.ai/"
     }
   }
 }

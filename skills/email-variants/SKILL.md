@@ -45,7 +45,7 @@ instalar nada a mano.
 
 Leer la campaña con el **conector Instantly** (la herramienta que trae una campaña por ID,
 con sus `sequences`) y guardar el JSON tal cual en `<carpeta>/raw/campaign_<id8>.json`. Sin
-conector Instantly: flujo n8n **instantly-sequences** (paso 5) con `action: "get"`. Después
+conector Instantly: pedir que lo conecte (`/mcp` → **instantly**). Después
 `python3 <skill>/scripts/variants.py <id> --campaign-json raw/campaign_<id8>.json`, desde la carpeta de la campaña:
 sin archivo de variantes todavía, deja los originales en `copy_originales_<id8>.md` para
 escribir a partir de ellos. **Avisar antes de escribir** si el
@@ -96,23 +96,7 @@ campaña original en `raw/campaign_<id8>_original.json`.
    → debe decir "original intacto".
 5. Si algo salió mal: con OK, update con el `sequences` de `raw/campaign_<id8>_original.json`.
 
-**Respaldo sin conector Instantly** (se quita en la próxima versión): flujo n8n
-**instantly-sequences** (`execute_workflow`, workflowId `201TuEKiJgIdUy67`,
-`triggerNodeName: "Webhook"`, `executionMode: "production"`,
-`inputs: {webhookData: {method: "POST", body}}`; el resultado sale del nodo "Respuesta",
-leído con `get_workflow_execution`):
-
-1. `{action: "update", campaign_id, sequences: <raw/sequences_update_<id8>.json>, dry_run: true}`
-   → `variantes_por_paso`, `asuntos` y `backup_id` (el respaldo se guarda igual). Mostrarlo y
-   pedir OK.
-2. Igual con `dry_run: false` → comprobar `ok: true` y `original_intacto: true`.
-3. Si algo salió mal: `{action: "restore", campaign_id, backup_id, dry_run: false}` (con OK;
-   restore también es seco por defecto).
-
-El flujo rechaza sin escribir si la campaña no está en borrador, si cambió algún original o
-la cantidad de pasos. Anotar el `backup_id` en `state.md`.
-
-Sin conector Instantly ni n8n:
+Sin conector Instantly (último recurso):
 respaldo local `variants.py <id>` (sin `--campaign-json` lee la API) y `--apply` (solo
 borrador, respalda en `raw/`), que lee la clave del `.env` por nombre (`--key-env`) sin
 mostrarla; anotarlo en `state.md`.

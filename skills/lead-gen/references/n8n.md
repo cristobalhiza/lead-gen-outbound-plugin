@@ -22,7 +22,6 @@ con el resultado del dry run a la vista.**
 |---|---|
 | verify-emails | 10S0lqLv81UxiOQp |
 | bounceban-recover | maopFC6H2WlQ0z04 |
-| instantly-upload | xUskbAVHt0JgVQFg |
 | prosp-upload | xc8iSwAhwG6QBvqN |
 
 Data tables (proyecto 499h0jTs4i5ljWD1): verify_cache OfbDGtm5yWSW1qIh,
@@ -48,21 +47,10 @@ flujo de errores).
 Body `{task_ids: [...]}` (1-2000). Gratis (solo `?id=`). Resumen:
 `{pedidos, recuperados, por_resultado, credits_remaining, fallos}`; hace upsert en verify_cache.
 
-## instantly-upload
-
-Respaldo: la vía por defecto es el conector Instantly (SKILL.md, Fase 6). Se quita en la
-próxima versión.
-
-Body `{campaign_id (uuid, obligatorio), dry_run (true por defecto), leads: [{email, first_name,
-last_name, company_name, verify_verdict, score?, title?, lead_id?, custom_variables?}]}`
-(1-1000). Rechaza veredictos que no sean "Reoon safe" / "BounceBan deliverable...". Sube de menor
-a mayor score. Seco → nodo "¿Subir?" (salida false): aceptados, rechazados, muestra.
-Real → nodo Resumen: `{subidos, total, fallos}`. `lead_id` lo resuelve la skill desde el HubSpot
-del cliente.
-
 ## prosp-upload
 
 Body `{list_id, campaign_id (obligatorios), dry_run (true por defecto), leads: [{linkedin_url
-(linkedin.com/in/...), name, job_title, company, hs_lead_id?}]}`. Salidas iguales a Instantly.
+(linkedin.com/in/...), name, job_title, company, hs_lead_id?}]}`. Seco → nodo "¿Subir?"
+(salida false): aceptados, rechazados, muestra. Real → nodo Resumen: `{subidos, total, fallos}`.
 Prosp corta cerca de 50/min (429): mandar bodies de ≤40 leads con 1 min entre ejecuciones y
 reintentar los `fallos` 429 tras la pausa (caso real: exec 2865 subió 50/85, reintento 2867 35/35).

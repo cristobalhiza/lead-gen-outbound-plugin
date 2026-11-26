@@ -35,11 +35,10 @@ Apollo (`apollo_*`), Clay, HubSpot, Instantly, n8n y LeadOcean (`leadocean_*`; d
 una tabla corta con lo que está y lo que falta, y guiarlo **paso a paso, de a uno**, con
 instrucciones que sirvan en la app de escritorio:
 - **Apollo, Clay, HubSpot**: claude.ai → Configuración → Conectores → buscar y conectar.
-- **Instantly**: conector personalizado en claude.ai → Configuración → Conectores → Agregar
-  conector personalizado, nombre `Instantly`, URL `https://mcp.instantly.ai/mcp/<API_KEY>`.
-  La API key es **personal**: que se la pida a quien administra Instantly en Saravá y la pegue
-  solo en ese formulario, nunca en el chat (si la pega en el chat, avisar que hay que
-  revocarla y pedir otra).
+- **Instantly**: viene con el plugin (OAuth, sin API key); si sus herramientas no aparecen o
+  piden login: `/mcp` → **instantly** → autenticar con su usuario del workspace de Saravá.
+  Nunca pedir una API key de Instantly ni aceptarla en el chat (si la pega, avisar que hay que
+  revocarla). Si además tiene el conector personalizado viejo (URL con key), sugerir borrarlo.
 - **n8n** (verificación de emails y Prosp): https://claude.ai/directory/n8n, con la URL de la instancia de Saravá y la cuenta
   compartida (la URL y el acceso los da Cristóbal por un canal privado; nunca pedirlos ni
   pegarlos en el chat).
@@ -297,9 +296,8 @@ por dominio bloqueado/Cisco/spamtrap no se reintentan.
 Siempre en seco primero (muestra + conteos), después la subida real con OK explícito.
 
 **Instantly por su conector** (herramienta de agregar leads en bulk a una campaña, con
-`skip_if_in_campaign: true`). Respaldo sin conector, se quita en la próxima versión: flujo n8n
-`instantly-upload` (`dry_run: true`, después `false`). Con el conector, el seco lo hace la
-skill antes de llamar:
+`skip_if_in_campaign: true`). Sin conector: pedir que lo conecte (`/mcp` → **instantly**).
+El seco lo hace la skill antes de llamar:
 - Solo filas de `07_verified_Send.csv` con `Verify_Verdict` "Reoon safe" o "BounceBan
   deliverable"; cualquier otra → fuera, listada.
 - **Ningún lead sin `lead_id`** (en `custom_variables`): si falta alguno, no se sube nada.

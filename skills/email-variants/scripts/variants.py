@@ -9,11 +9,11 @@ definir SIG = "línea1\\nlínea2" en el archivo de variantes.
 
     python3 variants.py <campaign_id> --campaign-json raw/campaign_<id8>.json [--dir .]
         valida + copy_variantes_<id8>.md para revisar + raw/sequences_update_<id8>.json
-        (el `sequences` que se escribe con el conector Instantly, o el flujo n8n de respaldo)
+        (el `sequences` que se escribe con el conector Instantly)
     python3 variants.py <campaign_id> --campaign-json raw/campaign_<id8>.json --after raw/campaign_<id8>_after.json
         después de escribir: mismos pasos y originales intactos; imprime variantes por paso
-La campaña se lee con el conector Instantly (o el flujo n8n instantly-sequences, action get).
-Respaldo sin n8n: sin --campaign-json lee la API y --apply escribe (solo borrador), con la clave
+La campaña se lee con el conector Instantly.
+Respaldo sin conector: sin --campaign-json lee la API y --apply escribe (solo borrador), con la clave
 del .env por NOMBRE (--key-env instantly_api_key; el valor no se imprime).
 --replace: la campaña ya tiene variantes; conserva la 0 y reemplaza el resto.
 """
