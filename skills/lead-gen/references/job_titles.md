@@ -13,9 +13,16 @@ Se ofrece SIEMPRE en la Fase 0, aunque el usuario no lo pida: "¿Amplío estos c
 
 ## Biblioteca reutilizable
 
-Antes de generar, revisar `references/titulos/<area>_<seniority_min>.txt`. Si existe,
-partir de esa lista ya aprobada y solo agregar lo que la semilla traiga de nuevo. Después
-de la aprobación, guardar/actualizar ese archivo (un cargo por línea) para la próxima campaña.
+Biblioteca compartida entre clientes, **fuera del plugin**: `~/Proyectos/sarava-clientes/_titulos/`
+(o la ruta que diga el archivo local `~/.claude/sarava-leadgen.local.md`). Archivo
+`<area>_<seniority_min>.txt`, un cargo por línea, sin nombres de clientes.
+
+Antes de generar, buscar `<area>_<seniority_min>.txt` primero en la biblioteca compartida y,
+si no está, en la semilla del plugin (`references/titulos/`, solo lectura). Si existe, partir
+de esa lista y solo agregar lo que la semilla del usuario traiga de nuevo: es un punto de
+partida, cada cliente igual aprueba sus cargos. Después de la aprobación, guardar/actualizar
+el archivo **solo en la biblioteca compartida** (crear la carpeta si no existe); nunca
+escribir en `references/titulos/` del plugin.
 
 ## Reglas de generación
 
