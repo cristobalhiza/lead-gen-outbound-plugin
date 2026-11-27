@@ -103,7 +103,7 @@ Campaign Hub, `docs/features/leadgen-sync.md`.
 | Fase 0 | `list_universes` (por `partner_short_name` o `campaign_id`) → el usuario elige → `get_universe` |
 | Universo aprobado (Fase 1, pasos 0 y 5) | `upsert_companies`: `pendiente` / `blacklist` / `fuera_icp`, y `procesada` **sin tanda** las que ya tienen contactos en HubSpot de campañas del universo |
 | Inicio de cada tanda | `start_wave` → el número que devuelve es la tanda (`w<K>`) |
-| Cierre de la Fase 2 de la tanda | `upsert_companies` (`procesada` o `sin_leads`, con `wave_number` y `leads_found`) + `update_wave` (`companies`, `leads_found`, `companies_zero_leads`, `credits`) |
+| Cierre de la Fase 2 de la tanda | `upsert_companies` (`procesada` o `sin_leads`, con `wave_number` y `leads_found`) + `update_wave` (`leads_found`, `credits`) |
 | Fin de la Fase 5 | `update_wave` (`hubspot_created`, `hubspot_updated`) + `set_request_status` `subido_hubspot` por cada solicitud |
 | Fin de la Fase 6 | `update_wave` (`sendable`, `prosp_only`, `instantly_uploaded`, `prosp_uploaded`, `credits`, `closed: true`) + `set_request_status` `completado` si la tanda cubre la solicitud (preguntar) |
 
@@ -112,6 +112,8 @@ Reglas:
   carpetas sobre el mismo universo no se pisan. Anotarlo en `state.md` y usarlo como `w<K>`.
 - `update_wave` y `upsert_companies` llevan valores **absolutos de la tanda** (no deltas):
   reenviar es seguro. `start_wave` no: si no se sabe si llegó, `get_universe` y revisar `waves`.
+- Con la lista cargada, TAM y enriquecidas salen **solo** de ella: enviar todas las empresas
+  del universo, y como `sin_leads` las ya buscadas sin resultado de las que haya registro.
 - `hubspot_created` + `hubspot_updated`: contactos creados **y** actualizados en HubSpot para la
   campaña en la Fase 5. Con eso Campaign Hub calcula los leads del TAM.
 - Un envío que falla **no bloquea** el lead gen: queda en `state.md` como pendiente y se reenvía.
@@ -276,8 +278,8 @@ LeadOcean: 5 req/s; ventanas de 5 h y semanales por búsqueda y por enriquecimie
 5. **Punto de control**: conteo por empresa, empresas con 0 leads, costo estimado del
    enriquecimiento. OK del usuario.
 6. **Campaign Hub**: las empresas de la tanda pasan a `procesada` (con leads) o `sin_leads`
-   (`upsert_companies` con `wave_number` y `leads_found`) y `update_wave` con `companies`,
-   `leads_found`, `companies_zero_leads` y los `credits` gastados hasta aquí.
+   (`upsert_companies` con `wave_number` y `leads_found`; Campaign Hub cuenta de ahí las
+   empresas de la tanda) y `update_wave` con `leads_found` y los `credits` gastados hasta aquí.
 
 ## Fase 3 - Enriquecer y emails
 
