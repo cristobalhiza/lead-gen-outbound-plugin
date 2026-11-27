@@ -23,7 +23,7 @@ con el resultado del dry run a la vista.**
 | verify-emails | 10S0lqLv81UxiOQp |
 | bounceban-recover | maopFC6H2WlQ0z04 |
 | prosp-upload | xc8iSwAhwG6QBvqN |
-| campaign-hub-sync | rq6yeEwj5vDurjx7 — **no listo** (borrador; no sincronizar hasta publicarlo, ver SKILL.md) |
+| campaign-hub-sync | rq6yeEwj5vDurjx7 |
 
 Data tables (proyecto 499h0jTs4i5ljWD1): verify_cache OfbDGtm5yWSW1qIh,
 verify_results 9BwOh1MPpudr8BCC, verify_runs Hm2OR6agABiToizh.
@@ -58,10 +58,11 @@ reintentar los `fallos` 429 tras la pausa (caso real: exec 2865 subió 50/85, re
 
 ## campaign-hub-sync
 
-ESTADO: **no listo**. Creado como borrador (`rq6yeEwj5vDurjx7`, carpeta Lead-gen); se publica
-después del deploy de Campaign Hub con universos. Al publicarlo, cambiar este ESTADO y el de la
-tabla. Mismo Header Auth que los otros flujos ("Lead-gen webhook"); responde con la respuesta de
-Campaign Hub más `status` (código HTTP): `execute_workflow` y leer el nodo "Respuesta".
+ESTADO 2026-11-27: **listo**. Publicado (`rq6yeEwj5vDurjx7`, carpeta Lead-gen) y probado contra
+producción con `list_universes` y `get_universe`; las acciones de escritura se estrenan en la
+primera tanda piloto (revisar `status` y la vista del universo). Mismo Header Auth que los otros
+flujos ("Lead-gen webhook"); responde con la respuesta de Campaign Hub más `status` (código
+HTTP): `execute_workflow` (`executionMode: "production"`) y leer el nodo "Respuesta".
 
 Reenvía el body tal cual a `POST /api/webhooks/leadgen` de Campaign Hub (el token
 `LEADGEN_WEBHOOK_TOKEN` vive en la credencial del flujo) y devuelve la respuesta. Body:
