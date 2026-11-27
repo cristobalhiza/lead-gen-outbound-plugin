@@ -116,6 +116,14 @@ Reglas:
   del universo, y como `sin_leads` las ya buscadas sin resultado de las que haya registro.
 - `hubspot_created` + `hubspot_updated`: contactos creados **y** actualizados en HubSpot para la
   campaña en la Fase 5. Con eso Campaign Hub calcula los leads del TAM.
+- **Carga atrasada** (tandas ya hechas que se registran después): mandar las fechas reales **sin
+  preguntar**: `started_at` en `start_wave` y `closed_at` junto a `closed: true`, en
+  `YYYY-MM-DD` (o `YYYY-MM-DD HH:MM:SS`, hora de Chile). Sacarlas del historial de `state.md` o de
+  lo que conste en los archivos de la tanda (no la fecha de modificación). Si se reenvía
+  `closed: true`, repetir `closed_at` (sin él cierra hoy). Si una fecha no consta, no inventarla:
+  no mandar el campo y anotarlo en `notes` y `state.md`. En una tanda que se está haciendo ahora
+  no se mandan. Comprobar que la respuesta (`startedAt`, `closedAt`) traiga las fechas enviadas;
+  si no, anotarlo en `state.md` como pendiente.
 - Un envío que falla **no bloquea** el lead gen: queda en `state.md` como pendiente y se reenvía.
 - Sin conector n8n, sin `campaign_hub.universe_id` o con el flujo no listo en
   `references/n8n.md`: seguir sin sincronizar y anotarlo en `state.md`.
