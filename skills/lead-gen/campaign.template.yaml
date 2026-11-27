@@ -55,6 +55,10 @@ crm:
   custom_properties: {}    # columna CSV -> propiedad HubSpot
   rules: []                # ej. asociación sitio->matriz, país, hs_timezone, target_persona
 
+campaign_hub:               # seguimiento del TAM en Campaign Hub (ver SKILL.md, Campaign Hub)
+  universe_id: ""          # universo elegido en la Fase 0 (list_universes); vacío = sin sincronizar
+  lead_request_ids: []     # solicitudes del Kanban de esta semana que cubre la tanda (email y/o LinkedIn)
+
 outreach:
   instantly_campaign_id: ""   # obligatorio para subir; cuenta Saravá salvo indicación
   prosp_list_id: ""           # obligatorio para subir a Prosp; cuenta Saravá salvo indicación

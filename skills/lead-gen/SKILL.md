@@ -55,7 +55,8 @@ Es lo que permite retomar en otra sesión. Dos partes:
 
 1. **Foto actual** (arriba, se reescribe): fecha, tanda y etapa en curso, **próximo paso
    exacto** (comando o llamada), decisiones pendientes del usuario, archivo vigente de cada
-   etapa, IDs abiertos (Clay taskId, BounceBan Task IDs 408, n8n run_id/executionId),
+   etapa, IDs abiertos (Clay taskId, BounceBan Task IDs 408, n8n run_id/executionId,
+   `universe_id` y número de tanda de Campaign Hub, envíos a Campaign Hub pendientes),
    acumulados por destino (HubSpot, Instantly, Prosp), empresas procesadas / restantes,
    créditos gastados (Apollo, BounceBan, Clay; registros LeadOcean).
 2. **Historial** (abajo, solo se agrega): una entrada por etapa o tanda cerrada, con fecha,
@@ -89,10 +90,48 @@ Herramientas:
   scripts viejos que lo hacen o un `.env` con claves: eso es de antes de los conectores. Si el
   conector no alcanza para el volumen, avisar al usuario en vez de pasarse a REST.
 
+## Campaign Hub (seguimiento del TAM)
+
+Campaign Hub lleva el TAM de cada **universo** (el conjunto de empresas objetivo de un ICP, que
+comparten las campañas `.email` + `.linkedin` del cliente): qué empresas quedan, qué se abordó y
+cómo rindió cada tanda. La skill le escribe con el flujo n8n `campaign-hub-sync`
+(`references/n8n.md`; el token vive en n8n, la skill nunca lo ve). Contrato completo en
+Campaign Hub, `docs/features/leadgen-sync.md`.
+
+| Momento | Acción (`body.action`) |
+|---|---|
+| Fase 0 | `list_universes` (por `partner_short_name` o `campaign_id`) → el usuario elige → `get_universe` |
+| Universo aprobado (Fase 1, pasos 0 y 5) | `upsert_companies`: `pendiente` / `blacklist` / `fuera_icp`, y `procesada` **sin tanda** las que ya tienen contactos en HubSpot de campañas del universo |
+| Inicio de cada tanda | `start_wave` → el número que devuelve es la tanda (`w<K>`) |
+| Cierre de la Fase 2 de la tanda | `upsert_companies` (`procesada` o `sin_leads`, con `wave_number` y `leads_found`) + `update_wave` (`companies`, `leads_found`, `companies_zero_leads`, `credits`) |
+| Fin de la Fase 5 | `update_wave` (`hubspot_created`, `hubspot_updated`) + `set_request_status` `subido_hubspot` por cada solicitud |
+| Fin de la Fase 6 | `update_wave` (`sendable`, `prosp_only`, `instantly_uploaded`, `prosp_uploaded`, `credits`, `closed: true`) + `set_request_status` `completado` si la tanda cubre la solicitud (preguntar) |
+
+Reglas:
+- **El número de tanda lo da Campaign Hub** (`start_wave`), no la carpeta: así dos personas o dos
+  carpetas sobre el mismo universo no se pisan. Anotarlo en `state.md` y usarlo como `w<K>`.
+- `update_wave` y `upsert_companies` llevan valores **absolutos de la tanda** (no deltas):
+  reenviar es seguro. `start_wave` no: si no se sabe si llegó, `get_universe` y revisar `waves`.
+- `hubspot_created` + `hubspot_updated`: contactos creados **y** actualizados en HubSpot para la
+  campaña en la Fase 5. Con eso Campaign Hub calcula los leads del TAM.
+- Un envío que falla **no bloquea** el lead gen: queda en `state.md` como pendiente y se reenvía.
+- Sin conector n8n, sin `campaign_hub.universe_id` o con el flujo no listo en
+  `references/n8n.md`: seguir sin sincronizar y anotarlo en `state.md`.
+
 ## Fase 0 - Clarify (obligatoria, antes de gastar nada)
 
 Leer el input, contar empresas/columnas, y con eso llenar `campaign.template.yaml` →
 `<carpeta>/campaign.yaml`. Si existe un `campaign.yaml`, leerlo y confirmar solo lo que falte.
+
+**Primero, el universo en Campaign Hub** (si hay conector n8n): `list_universes` del cliente y pedir al
+usuario que elija el universo (cada uno muestra sus campañas) → `campaign_hub.universe_id`.
+Después `get_universe`: su `campaigns_icp` es **solo una referencia** para prellenar
+`campaign.yaml` (industria, países, tamaños, cargos, seniority, áreas, tope por empresa).
+Mostrarlo como "lo que dice Campaign Hub" y **revisar y confirmar con el usuario cada
+criterio como siempre** (puntos 2-4 incluidos): nunca darlo por aprobado. Si
+`lead_requests_this_week` trae solicitudes, ofrecerlas como meta de la tanda y guardar las
+elegidas en `campaign_hub.lead_request_ids`.
+
 Preguntar con AskUserQuestion (agrupado, máx. 4 por vez) todo lo que no esté explícito:
 
 0. **Origen de las empresas**: por defecto **ICP** (industria, país, tamaños, otros filtros),
@@ -153,6 +192,8 @@ anota en `state.md`. Las métricas de esa tanda sirven de piloto para las siguie
 
 Columna `Wave` en `00_companies.csv` (vacío = sin procesar). Archivos por tanda:
 `NN_etapa_w<K>.csv`. `state.md` lleva el acumulado por tanda y el universo restante.
+Con Campaign Hub, cada tanda empieza con `start_wave` (`run_by`, `lead_request_ids`) y `<K>` es
+el número que devuelve (ver Campaign Hub).
 
 ## Límites de velocidad de Apollo
 
@@ -207,6 +248,11 @@ LeadOcean: 5 req/s; ventanas de 5 h y semanales por búsqueda y por enriquecimie
    matchean se listan.
 5. **Ya existentes en HubSpot**: buscar por dominio/nombre (HubSpot MCP o API con el token
    de la config). Marcar `HS_Company_ID`; no se duplican. → `03_companies_enriched.csv`
+6. **Campaign Hub** (universo aprobado, una vez): `upsert_companies` con todo el universo
+   (`pendiente`; `blacklist` las de `00_blacklisted.csv`; `fuera_icp` las que el usuario sacó).
+   Las que ya tienen contactos en HubSpot de campañas del universo van como `procesada` sin
+   `wave_number` (trabajadas antes del plugin). Con `company_source: list` la lista **es** el
+   TAM. Lotes de hasta 2000. Mostrar los contadores que devuelve (TAM, enriquecidas).
 
 ## Fase 2 - Personas (Apollo + Clay + LeadOcean)
 
@@ -229,6 +275,9 @@ LeadOcean: 5 req/s; ventanas de 5 h y semanales por búsqueda y por enriquecimie
    fuera en `04_overflow.csv` (no se pierden). → `04_people.csv`
 5. **Punto de control**: conteo por empresa, empresas con 0 leads, costo estimado del
    enriquecimiento. OK del usuario.
+6. **Campaign Hub**: las empresas de la tanda pasan a `procesada` (con leads) o `sin_leads`
+   (`upsert_companies` con `wave_number` y `leads_found`) y `update_wave` con `companies`,
+   `leads_found`, `companies_zero_leads` y los `credits` gastados hasta aquí.
 
 ## Fase 3 - Enriquecer y emails
 
@@ -290,6 +339,9 @@ por dominio bloqueado/Cisco/spamtrap no se reintentan.
    config. Aplicar solo las reglas de su `crm.rules`.
    Siempre: muestra de 3 registros + conteos crear/actualizar → OK → escribir.
 3. Verificar después: conteo en HubSpot = conteo esperado; lista/batch creada.
+4. **Campaign Hub**: `update_wave` con `hubspot_created` y `hubspot_updated` (contactos creados y
+   actualizados de la campaña en esta tanda) y `set_request_status` `subido_hubspot` por cada
+   solicitud de `campaign_hub.lead_request_ids`.
 
 ## Fase 6 - Outreach
 
@@ -320,6 +372,10 @@ enviable y sí LinkedIn. El workspace es compartido entre clientes: el id nunca 
 tandas. Los que vuelvan con 429 se reintentan solos después de la pausa (no son rechazo). El
 total de Prosp se cuenta por los resúmenes de n8n, porque Prosp no se puede contar por API.
 
+**Campaign Hub** al terminar: `update_wave` con `sendable`, `prosp_only`, `instantly_uploaded`,
+`prosp_uploaded`, `credits` (totales de la tanda) y `closed: true`. Si la tanda cubre la meta de
+la solicitud, preguntar y marcarla `completado` con `set_request_status`.
+
 ## Cierre
 
 Al cerrar cada tanda: contrastar `campaign.yaml` con las reglas que de verdad se aplicaron
@@ -329,4 +385,4 @@ la sesión; borrar archivos de estado viejos (`RUN.md`, etc.) si `state.md` ya l
 Resumen en `state.md` y al usuario: empresas, descartadas por blacklist (lista de
 `00_blacklisted.csv` con su match), leads por fuente, emails por fuente, Send/Discard/
 Pending, créditos gastados (Apollo, BounceBan, Clay; registros LeadOcean), creados/actualizados en HubSpot,
-subidos a Instantly/Prosp, y pendientes.
+subidos a Instantly/Prosp, y pendientes (incluidos los envíos a Campaign Hub sin confirmar).

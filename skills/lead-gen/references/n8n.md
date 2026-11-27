@@ -23,6 +23,7 @@ con el resultado del dry run a la vista.**
 | verify-emails | 10S0lqLv81UxiOQp |
 | bounceban-recover | maopFC6H2WlQ0z04 |
 | prosp-upload | xc8iSwAhwG6QBvqN |
+| campaign-hub-sync | rq6yeEwj5vDurjx7 — **no listo** (borrador; no sincronizar hasta publicarlo, ver SKILL.md) |
 
 Data tables (proyecto 499h0jTs4i5ljWD1): verify_cache OfbDGtm5yWSW1qIh,
 verify_results 9BwOh1MPpudr8BCC, verify_runs Hm2OR6agABiToizh.
@@ -54,3 +55,18 @@ Body `{list_id, campaign_id (obligatorios), dry_run (true por defecto), leads: [
 (salida false): aceptados, rechazados, muestra. Real → nodo Resumen: `{subidos, total, fallos}`.
 Prosp corta cerca de 50/min (429): mandar bodies de ≤40 leads con 1 min entre ejecuciones y
 reintentar los `fallos` 429 tras la pausa (caso real: exec 2865 subió 50/85, reintento 2867 35/35).
+
+## campaign-hub-sync
+
+ESTADO: **no listo**. Creado como borrador (`rq6yeEwj5vDurjx7`, carpeta Lead-gen); se publica
+después del deploy de Campaign Hub con universos. Al publicarlo, cambiar este ESTADO y el de la
+tabla. Mismo Header Auth que los otros flujos ("Lead-gen webhook"); responde con la respuesta de
+Campaign Hub más `status` (código HTTP): `execute_workflow` y leer el nodo "Respuesta".
+
+Reenvía el body tal cual a `POST /api/webhooks/leadgen` de Campaign Hub (el token
+`LEADGEN_WEBHOOK_TOKEN` vive en la credencial del flujo) y devuelve la respuesta. Body:
+`{action, ...}` en `snake_case`; acciones `list_universes`, `get_universe`, `upsert_companies`
+(≤2000 empresas), `start_wave`, `update_wave`, `set_request_status`. Cuándo llamar cada una:
+SKILL.md, sección Campaign Hub. Contrato y ejemplos: Campaign Hub,
+`docs/features/leadgen-sync.md`. Errores: 400 nombra el campo o la fila (no se escribió nada),
+404 universo/tanda/solicitud inexistente, 401 token mal configurado en n8n (avisar a Cristóbal).
